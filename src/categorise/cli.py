@@ -1,0 +1,180 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+import typer
+from psycopg import OperationalError
+from rich import print_json
+from rich.console import Console
+from rich.table import Table
+
+from .lm_studio import LMStudioClient
+from .service import CategorisationService
+from .store import DEFAULT_DATABASE_URL, PostgresStore
+
+
+app = typer.Typer(help="Prototype local LLM document categoriser.")
+console = Console()
+
+
+DEFAULT_CATEGORIES = [
+    (
+        "Supplier invoices",
+        "Invoices received from suppliers for goods or services.",
+    ),
+    (
+        "Contracts",
+        "Legal agreements such as employment contracts, supplier contracts, service agreements, and non-disclosure agreements.",
+    ),
+    (
+        "Meeting minutes",
+        "Notes and minutes documenting meetings, decisions, attendees, actions, and follow-up items.",
+    ),
+    (
+        "Project reports",
+        "Recurring or milestone-based reports about project status, progress, risks, or performance.",
+    ),
+    (
+        "Travel expense reports",
+        "Documents requesting or documenting reimbursement for business travel, hotel, train, and related expenses.",
+    ),
+    (
+        "Technical documentation",
+        "Technical specifications, installation guides, maintenance instructions, and system documentation.",
+    ),
+    (
+        "Emails and correspondence",
+        "Business correspondence, email requests, supplier communications, customer messages, and project update emails.",
+    ),
+    (
+        "HR documents",
+        "Human resources documents such as vacation requests, training certificates, onboarding, and employee records.",
+    ),
+]
+
+
+def database_url_option() -> str:
+    return typer.Option(
+        DEFAULT_DATABASE_URL,
+        help="PostgreSQL URL. Can also be set with DOCUMIND_DATABASE_URL.",
+    )
+
+
+def make_service(database_url: str) -> CategorisationService:
+    return CategorisationService(make_store(database_url), LMStudioClient())
+
+
+def make_store(database_url: str) -> PostgresStore:
+    try:
+        return PostgresStore(database_url)
+    except (OperationalError, RuntimeError) as exc:
+        console.print(
+            "[bold red]Could not connect to PostgreSQL.[/bold red]\n"
+            f"Database URL: {database_url}\n"
+            "Start PostgreSQL with pgvector enabled or set DOCUMIND_DATABASE_URL to the correct connection string.\n"
+            f"Error: {exc}"
+        )
+        raise typer.Exit(code=1) from exc
+
+
+@app.command()
+def add_category(
+    name: str,
+    description: str,
+    database_url: str = database_url_option(),
+) -> None:
+    service = make_service(database_url)
+    category = service.add_category(name=name, description=description)
+    console.print(f"Added category [bold]{category.name}[/bold] ({category.id})")
+
+
+@app.command()
+def seed_categories(
+    database_url: str = database_url_option(),
+) -> None:
+    service = make_service(database_url)
+    existing_names = {category.name.lower() for category in service.store.load_categories()}
+    table = Table("Category", "Status", "ID")
+
+    for name, description in DEFAULT_CATEGORIES:
+        if name.lower() in existing_names:
+            table.add_row(name, "already exists", "")
+            continue
+        category = service.add_category(name=name, description=description)
+        existing_names.add(name.lower())
+        table.add_row(category.name, "added", category.id)
+
+    console.print(table)
+
+
+@app.command()
+def list_categories(
+    database_url: str = database_url_option(),
+) -> None:
+    categories = make_store(database_url).load_categories()
+    table = Table("ID", "Name", "Status", "Description")
+    for category in categories:
+        table.add_row(category.id, category.name, category.status, category.description)
+    console.print(table)
+
+
+@app.command()
+def categorise(
+    path: Path,
+    database_url: str = database_url_option(),
+) -> None:
+    service = make_service(database_url)
+    document = service.categorise_file(path)
+    print_json(data=document.model_dump(mode="json"))
+
+
+@app.command()
+def categorise_folder(
+    folder: Path,
+    pattern: str = typer.Option("*.txt", help="File glob pattern to process."),
+    recursive: bool = typer.Option(True, help="Search recursively."),
+    database_url: str = database_url_option(),
+) -> None:
+    service = make_service(database_url)
+    categories = {category.id: category.name for category in service.store.load_categories()}
+    paths = sorted(folder.rglob(pattern) if recursive else folder.glob(pattern))
+
+    if not paths:
+        console.print(f"No files matched [bold]{pattern}[/bold] in {folder}")
+        raise typer.Exit(code=1)
+
+    table = Table("File", "Status", "Suggested Category", "Errors")
+    for path in paths:
+        document = service.categorise_file(path)
+        category_name = categories.get(
+            document.primary_category_id,
+            document.primary_category_id or "",
+        )
+        table.add_row(
+            str(path),
+            document.status,
+            category_name,
+            "; ".join(document.errors),
+        )
+
+    console.print(table)
+
+
+@app.command()
+def list_documents(
+    database_url: str = database_url_option(),
+) -> None:
+    documents = make_store(database_url).load_documents()
+    table = Table("ID", "Filename", "Status", "Suggested/Final Category")
+    for document in documents:
+        table.add_row(
+            document.id,
+            document.filename,
+            document.status,
+            document.primary_category_id or "",
+        )
+    console.print(table)
+
+
+if __name__ == "__main__":
+    app()
