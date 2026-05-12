@@ -1,0 +1,19 @@
+# ERWARTETE KATEGORIE: none_fits
+# SCHWIERIGKEIT: schwer
+Lessons Learned und Verbesserungsvorschlaege
+Projekt: Polagromat-Abfuellung
+Erstellt von: Sandra Krause
+Datum: 30.06.2026
+Verteiler: Projektleitung, Engineering, Einkauf, Inbetriebnahme
+
+Nach Abschluss der Inbetriebnahme bei Polagromat Sp. z o.o. wurden mehrere Punkte identifiziert, die fuer Folgeprojekte relevant sind. Insgesamt wurde die Anlage vom Kunden positiv bewertet, insbesondere die polnische Bedienoberflaeche und die schnelle Reaktion unseres Montageteams. Dennoch entstanden vermeidbare Zusatzaufwaende in der Integrationsphase.
+
+Erstens sollte die Schnittstelle zur kundenseitigen Etikettiermaschine frueher geklaert werden. Im Projekt lagen die finalen Signale erst kurz vor dem internen Funktionstest vor. Fuer kuenftige Abfuellprojekte schlage ich vor, bereits in der Engineering-Freigabe eine verbindliche Signalliste des Fremdgewerks anzufordern und diese als Meilenstein im Terminplan zu fuehren.
+
+Zweitens war die Versandverpackung der Sensorleitungen nicht ausreichend eindeutig beschriftet. Vor Ort mussten mehrere Kartons geoeffnet werden, um die passenden M12-Leitungen zu finden. Eine einfache farbliche Kennzeichnung nach Anlagenbereich wuerde die Montagezeit reduzieren. Markus Foerster sollte dies mit den Lieferanten abstimmen.
+
+Drittens hat sich die Vorab-Schulung per Videokonferenz bewaehrt. Die Bediener von Polagromat konnten dadurch beim SAT gezieltere Fragen stellen. Dieses Format sollte standardmaessig angeboten werden, wenn Kunden ausserhalb Deutschlands betreut werden.
+
+Viertens benoetigen wir intern eine klarere Regelung fuer Uebersetzungen von HMI-Meldungen. Die technische Uebersetzung war korrekt, aber einzelne Formulierungen wirkten fuer den Kunden ungewohnt. Empfehlung: Freigabe der Sprachdatei durch den Kunden mindestens zwei Wochen vor FAT.
+
+Die genannten Punkte sollten in die Standard-Checkliste fuer Abfuellanlagen uebernommen werden.

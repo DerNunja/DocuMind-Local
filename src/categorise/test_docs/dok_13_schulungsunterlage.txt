@@ -1,0 +1,16 @@
+# ERWARTETE KATEGORIE: none_fits
+# SCHWIERIGKEIT: schwer
+Schulungsunterlage
+Einweisung neuer Monteure: Inbetriebnahme von Druckbehaeltern
+Nordharz Anlagenbau GmbH
+Version 2026-02
+
+Ziel dieser Einweisung ist es, neuen Monteuren die grundlegenden Sicherheitsregeln fuer Arbeiten an Anlagen mit Druckbehaeltern zu vermitteln. Die Unterlage ersetzt keine befugte Pruefung und keine projektspezifische Gefaehrdungsbeurteilung. Sie ist vor dem ersten Einsatz auf Baustellen wie Projekt ChemTech-Reaktor verpflichtend durchzuarbeiten.
+
+Vor Arbeitsbeginn ist zu pruefen, ob der Druckbehaelter eindeutig identifiziert ist. Typenschild, Zeichnungsnummer und Projektdokumentation muessen zusammenpassen. Arbeiten an Druckgeraeten duerfen nur erfolgen, wenn der Behaelter drucklos, entleert, gegen Wiederbefuellen gesichert und ausreichend belueftet ist. Blindflansche, Absperrungen und Entlastungsstellen sind sichtbar zu kennzeichnen.
+
+Bei der Inbetriebnahme ist besonders auf Restenergien zu achten. Auch nach dem Entleeren koennen Mediumreste, Temperaturunterschiede oder gespeicherte Federkraefte an Armaturen vorhanden sein. Vor dem Loesen von Flanschen ist eine Freigabe durch den verantwortlichen Bauleiter einzuholen. Persoenliche Schutzausruestung umfasst mindestens Schutzbrille, Sicherheitsschuhe, geeignete Handschuhe und bei chemischen Medien zusaetzlich Gesichtsschutz.
+
+Pruefungen und Veraenderungen an Sicherheitseinrichtungen sind untersagt, sofern sie nicht ausdruecklich im Arbeitsauftrag beschrieben sind. Sicherheitsventile, Berstscheiben und Drucksensoren werden nicht provisorisch ueberbrueckt. Festgestellte Abweichungen sind sofort an Thomas Berger oder die zustaendige Projektleitung zu melden.
+
+Zum Abschluss der Einweisung bestaetigt der Monteur, dass er die Meldewege, Sperrkennzeichnungen und Not-Halt-Einrichtungen kennt. Offene Fragen sind vor dem Baustelleneinsatz zu klaeren.

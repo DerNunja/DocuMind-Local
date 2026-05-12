@@ -13,8 +13,9 @@ Ruff_Plan.md
 architecture.md
 critic.md
 
+
 # Virtual environments
 .venv
 .documind/
 examples_tests/
-retest/
+test_docs_nosolution/

@@ -1,0 +1,18 @@
+# ERWARTETE KATEGORIE: Technische Spezifikationen
+# SCHWIERIGKEIT: leicht
+Technisches Datenblatt / Lastenheftauszug
+Bauteil: Rohrbuendel-Waermetauscher WT-203
+Projekt: ChemTech-Reaktor
+Kunde: ChemTech Sachsen AG
+Revision: 1.2 vom 21.04.2026
+Erstellt: Sandra Krause, Nordharz Anlagenbau GmbH
+
+Einsatzfall: Der Waermetauscher WT-203 dient zur kontrollierten Abkuehlung des Reaktorproduktstroms nach Chargenende. Das Produkt ist ein waessrig-organisches Zwischenprodukt mit leicht korrosiven Bestandteilen. Die Auslegung erfolgt fuer Dauerbetrieb mit regelmaessigen CIP-Spuelungen.
+
+Prozessdaten Produktseite: Eintrittstemperatur 92 Grad Celsius, Austrittstemperatur 38 Grad Celsius, Massenstrom 4.200 kg/h, Betriebsdruck 5,5 bar g, Auslegungsdruck 10 bar g. Viskositaet bei Auslegungspunkt 3,8 mPa s. Produktberuehrte Werkstoffe mindestens Edelstahl 1.4571, Oberflaechenrauheit produktseitig Ra kleiner 0,8 Mikrometer.
+
+Kuehlmedium: Wasser-Glykol-Gemisch 30 %, Eintritt 12 Grad Celsius, Austritt maximal 24 Grad Celsius, Betriebsdruck 3 bar g. Anschlussdimensionen Kuehlseite DN50, Produktseite DN65, Flansch nach EN 1092-1 PN16.
+
+Anforderungen an Konstruktion und Dokumentation: Der Apparat ist nach Druckgeraeterichtlinie 2014/68/EU auszulegen. Schweissnaehte produktberuehrt sind gebeizt und passiviert auszufuehren. Erforderliche Dokumente: Werkstoffzeugnisse 3.1, Druckpruefprotokoll, Masszeichnung, Bedien- und Wartungsanleitung in deutscher Sprache.
+
+Besondere Randbedingungen: Maximale Bauhoehe 1.850 mm wegen vorhandener Buehne. Demontage des Rohrbuendels muss nach vorne moeglich sein. Entleerungsstutzen am tiefsten Punkt vorsehen. Temperaturfuehleranschluss G1/2 fuer TIR-203 ist im Austrittsbereich vorzusehen.
