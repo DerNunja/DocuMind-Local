@@ -7,6 +7,8 @@ from typing import Any
 
 import requests
 
+from .prompts import REPAIR_SYSTEM_PROMPT, REPAIR_USER_TEMPLATE
+
 
 DEFAULT_CHAT_MODEL = os.getenv("LM_STUDIO_CHAT_MODEL", "google/gemma-4-e4b")
 DEFAULT_EMBEDDING_MODEL = os.getenv(
@@ -38,8 +40,8 @@ class LMStudioClient:
             return parse_json_object(content)
         except ValueError:
             repaired = self.chat(
-                "Return only valid JSON. Do not include markdown or commentary.",
-                f"Repair this into valid JSON only:\n\n{content}",
+                REPAIR_SYSTEM_PROMPT.strip(),
+                REPAIR_USER_TEMPLATE.replace("{content}", content).strip(),
             )
             return parse_json_object(repaired)
 

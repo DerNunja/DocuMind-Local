@@ -15,6 +15,7 @@ from .models import (
     DocumentRecord,
     DocumentStatus,
 )
+from .prompts import DECISION_SYSTEM_PROMPT, DECISION_USER_TEMPLATE, PROFILE_SYSTEM_PROMPT, PROFILE_USER_TEMPLATE
 from .store import PostgresStore
 from .vector import fallback_embedding
 
@@ -93,32 +94,8 @@ class CategorisationService:
         return self.categorise_text(text=text, filename=path.name, source_path=str(path))
 
     def build_profile(self, text: str, filename: str) -> ClassificationProfile:
-        system_prompt = (
-            "You extract deterministic document classification profiles. "
-            "Return only valid JSON matching the requested shape."
-        )
-        user_prompt = f"""
-Create a classification profile for this document.
-
-Return this JSON shape exactly:
-{{
-  "summary": "3-5 sentence summary",
-  "document_type": "invoice | contract | report | email | letter | protocol | other",
-  "business_purpose": "why the organisation would store this document",
-  "key_entities": {{"people": [], "companies": [], "departments": [], "projects": []}},
-  "key_references": {{"order_numbers": [], "contract_numbers": [], "case_numbers": []}},
-  "dates": [],
-  "amounts": [],
-  "keywords": [],
-  "suggested_tags": {{"vendor": [], "project": [], "year": [], "location": [], "department": [], "topic": []}},
-  "evidence_snippets": []
-}}
-
-Filename: {filename}
-
-Document text:
-{text[:12000]}
-""".strip()
+        system_prompt = PROFILE_SYSTEM_PROMPT.strip()
+        user_prompt = render_profile_prompt(filename, text)
         return ClassificationProfile.model_validate(
             self.client.chat_json(system_prompt, user_prompt)
         )
@@ -171,36 +148,8 @@ Document text:
                 }
             )
 
-        system_prompt = (
-            "You classify documents into stable business filing categories. "
-            "Choose only from active candidate categories, or return none_fits. "
-            "Do not invent narrow categories for vendor, year, city, or project details. "
-            "Return only valid JSON."
-        )
-        user_prompt = f"""
-Classify this document profile.
-
-Document profile JSON:
-{profile.model_dump_json(indent=2)}
-
-Candidate categories JSON:
-{json.dumps(candidate_payload, indent=2)}
-
-Return this JSON shape exactly:
-{{
-  "decision": "category | none_fits",
-  "selected_category_id": null,
-  "ranking": [{{"category_id": "...", "category_name": "...", "fit": "strong | medium | weak", "reason": "..."}}],
-  "rationale": "short reviewer-facing explanation",
-  "evidence_snippets": [],
-  "proposed_tags": {{"vendor": [], "project": [], "year": [], "location": [], "department": [], "topic": []}},
-  "warnings": [],
-  "diagnostic_confidence": 0.0,
-  "none_fits_proposal": null
-}}
-
-If no candidate fits, set decision to "none_fits", selected_category_id to null, and fill none_fits_proposal with a stable business category suggestion.
-""".strip()
+        system_prompt = DECISION_SYSTEM_PROMPT.strip()
+        user_prompt = render_decision_prompt(profile, candidate_payload)
         decision = ClassificationDecision.model_validate(
             self.client.chat_json(system_prompt, user_prompt)
         )
@@ -217,3 +166,27 @@ If no candidate fits, set decision to "none_fits", selected_category_id to null,
             return self.client.embed(text)
         except requests.RequestException:
             return fallback_embedding(text)
+
+
+def render_profile_prompt(filename: str, text: str) -> str:
+    return (
+        PROFILE_USER_TEMPLATE.replace("{{filename}}", filename)
+        .replace("{{text[:12000]}}", text[:12000])
+        .strip()
+    )
+
+
+def render_decision_prompt(
+    profile: ClassificationProfile, candidate_payload: list[dict]
+) -> str:
+    return (
+        DECISION_USER_TEMPLATE.replace(
+            "{{profile.model_dump_json(indent=2)}}",
+            profile.model_dump_json(indent=2),
+        )
+        .replace(
+            "{{json.dumps(candidate_payload, indent=2)}}",
+            json.dumps(candidate_payload, indent=2, ensure_ascii=False),
+        )
+        .strip()
+    )

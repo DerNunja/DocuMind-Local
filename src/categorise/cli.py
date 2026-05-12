@@ -9,48 +9,13 @@ from rich.console import Console
 from rich.table import Table
 
 from .lm_studio import LMStudioClient
+from .prompts import SEED_CATEGORIES
 from .service import CategorisationService
 from .store import DEFAULT_DATABASE_URL, PostgresStore
 
 
 app = typer.Typer(help="Prototype local LLM document categoriser.")
 console = Console()
-
-
-DEFAULT_CATEGORIES = [
-    (
-        "Supplier invoices",
-        "Invoices received from suppliers for goods or services.",
-    ),
-    (
-        "Contracts",
-        "Legal agreements such as employment contracts, supplier contracts, service agreements, and non-disclosure agreements.",
-    ),
-    (
-        "Meeting minutes",
-        "Notes and minutes documenting meetings, decisions, attendees, actions, and follow-up items.",
-    ),
-    (
-        "Project reports",
-        "Recurring or milestone-based reports about project status, progress, risks, or performance.",
-    ),
-    (
-        "Travel expense reports",
-        "Documents requesting or documenting reimbursement for business travel, hotel, train, and related expenses.",
-    ),
-    (
-        "Technical documentation",
-        "Technical specifications, installation guides, maintenance instructions, and system documentation.",
-    ),
-    (
-        "Emails and correspondence",
-        "Business correspondence, email requests, supplier communications, customer messages, and project update emails.",
-    ),
-    (
-        "HR documents",
-        "Human resources documents such as vacation requests, training certificates, onboarding, and employee records.",
-    ),
-]
 
 
 def database_url_option() -> str:
@@ -96,7 +61,9 @@ def seed_categories(
     existing_names = {category.name.lower() for category in service.store.load_categories()}
     table = Table("Category", "Status", "ID")
 
-    for name, description in DEFAULT_CATEGORIES:
+    for seed_category in SEED_CATEGORIES:
+        name = seed_category["name"]
+        description = seed_category["description"]
         if name.lower() in existing_names:
             table.add_row(name, "already exists", "")
             continue
