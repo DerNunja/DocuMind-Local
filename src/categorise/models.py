@@ -131,6 +131,13 @@ class ClassificationDecision(BaseModel):
     diagnostic_confidence: float | None = None
     none_fits_proposal: NoneFitsProposal | None = None
 
+    @field_validator("none_fits_proposal", mode="before")
+    @classmethod
+    def normalize_none_fits_proposal(cls, value: Any) -> Any:
+        if value is None or isinstance(value, dict):
+            return value
+        return {"name": str(value), "description": str(value)}
+
 
 class DocumentRecord(BaseModel):
     id: str = Field(default_factory=lambda: new_id("doc"))
