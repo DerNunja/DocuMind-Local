@@ -163,5 +163,25 @@ def list_documents(
     console.print(table)
 
 
+@app.command()
+def list_taxonomy_reviews(
+    database_url: str = database_url_option(),
+) -> None:
+    documents = make_store(database_url).load_documents()
+    table = Table("Filename", "Status", "Proposed Category", "Description", "Rationale")
+    for document in documents:
+        if document.status != "needs_taxonomy_review":
+            continue
+        proposal = document.decision.none_fits_proposal if document.decision else None
+        table.add_row(
+            document.filename,
+            document.status,
+            proposal.name if proposal else "",
+            proposal.description if proposal else "",
+            document.decision.rationale if document.decision else "",
+        )
+    console.print(table)
+
+
 if __name__ == "__main__":
     app()
