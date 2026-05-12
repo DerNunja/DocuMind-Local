@@ -10,6 +10,7 @@ import requests
 from .prompts import REPAIR_SYSTEM_PROMPT, REPAIR_USER_TEMPLATE
 
 
+#DEFAULT_CHAT_MODEL = os.getenv("LM_STUDIO_CHAT_MODEL", "qwen3.6-35b-a3b")
 DEFAULT_CHAT_MODEL = os.getenv("LM_STUDIO_CHAT_MODEL", "google/gemma-4-e4b")
 DEFAULT_EMBEDDING_MODEL = os.getenv(
     "LM_STUDIO_EMBEDDING_MODEL", "text-embedding-qwen3-embedding-4b"
