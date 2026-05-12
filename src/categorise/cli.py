@@ -6,6 +6,7 @@ import typer
 from psycopg import OperationalError
 from rich import print_json
 from rich.console import Console
+from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn, TimeElapsedColumn, TimeRemainingColumn
 from rich.table import Table
 
 from .lm_studio import LMStudioClient
@@ -111,18 +112,30 @@ def categorise_folder(
         raise typer.Exit(code=1)
 
     table = Table("File", "Status", "Suggested Category", "Errors")
-    for path in paths:
-        document = service.categorise_file(path)
-        category_name = categories.get(
-            document.primary_category_id,
-            document.primary_category_id or "",
-        )
-        table.add_row(
-            str(path),
-            document.status,
-            category_name,
-            "; ".join(document.errors),
-        )
+    progress = Progress(
+        TextColumn("[bold blue]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeElapsedColumn(),
+        TimeRemainingColumn(),
+        console=console,
+    )
+    with progress:
+        task = progress.add_task("Categorising documents", total=len(paths))
+        for path in paths:
+            progress.update(task, description=f"Categorising {path.name}")
+            document = service.categorise_file(path)
+            category_name = categories.get(
+                document.primary_category_id,
+                document.primary_category_id or "",
+            )
+            table.add_row(
+                str(path),
+                document.status,
+                category_name,
+                "; ".join(document.errors),
+            )
+            progress.advance(task)
 
     console.print(table)
 
@@ -131,13 +144,20 @@ def categorise_folder(
 def list_documents(
     database_url: str = database_url_option(),
 ) -> None:
-    documents = make_store(database_url).load_documents()
-    table = Table("ID", "Filename", "Status", "Suggested/Final Category")
+    store = make_store(database_url)
+    documents = store.load_documents()
+    categories = {category.id: category.name for category in store.load_categories()}
+    table = Table("ID", "Filename", "Status", "Category", "Category ID")
     for document in documents:
+        category_name = categories.get(
+            document.primary_category_id,
+            "" if document.primary_category_id is None else "unknown",
+        )
         table.add_row(
             document.id,
             document.filename,
             document.status,
+            category_name,
             document.primary_category_id or "",
         )
     console.print(table)
