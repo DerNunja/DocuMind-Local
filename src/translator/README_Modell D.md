@@ -1,52 +1,277 @@
-# Modul D – Lokales Übersetzungsmodul (Englisch)
+# Modul D – Lokales Übersetzungsmodul (DE → EN)
 
-**Projekt:** Lokales KI-gestütztes Dokumentenmanagementsystem | **Kurs:** Projektmanagement | **Semester 6**
+## Projektinformationen
 
----
-
-## Was ist das hier?
-
-Dieses Modul ist mein Teil des gemeinsamen Projekts. Die Kernaufgabe besteht darin, das Dokumentenmanagementsystem (DMS) für die Verarbeitung internationaler Projektunterlagen der **Nordharz Anlagenbau GmbH** zu befähigen. Mein Modul nimmt den durch die Digitalisierung (OCR) bereitgestellten Rohtext entgegen, bereinigt ihn und übersetzt den Inhalt präzise und vollständig ins **Englische**.
-
-Das Besondere daran: Um die strikte **DSGVO-Konformität** und die vollständige Offline-Fähigkeit des Unternehmens zu gewährleisten, läuft die gesamte Übersetzungspipeline lokal auf dem eigenen Rechner. Es werden keinerlei Daten an externe Cloud-Dienste (wie DeepL oder OpenAI) gesendet. Dank eines hochoptimierten, spezialisierten neuronalen Übersetzungsmodells läuft das System extrem ressourceneffizient auf Standard-CPUs – eine teure GPU-Infrastruktur ist nicht erforderlich.
+**Projekt:** Lokales KI-gestütztes Dokumentenmanagementsystem  
+**Kurs:** Projektmanagement  
+**Semester:** 6  
 
 ---
 
-## Voraussetzungen
+# Überblick
+
+Dieses Modul ist verantwortlich für die lokale Übersetzung technischer Dokumente aus dem Deutschen ins Englische innerhalb des gemeinsamen Dokumentenmanagementsystems (DMS).
+
+Das System verarbeitet OCR-generierte Rohtexte, bereinigt typische OCR-Fehler und übersetzt den Inhalt vollständig offline mit einem spezialisierten neuronalen Übersetzungsmodell.
+
+Ziel ist die DSGVO-konforme Verarbeitung sensibler Unternehmensdokumente ohne externe Cloud-Dienste.
+
+---
+
+# Hauptfunktionen
+
+- Vollständig lokale Übersetzung (keine Cloud-APIs)
+- OCR-Textbereinigung
+- Semantisch präzise Fachübersetzung
+- CPU-optimierte Ausführung
+- Integration in die gemeinsame Pipeline
+- Streamlit-Weboberfläche
+
+---
+
+# Voraussetzungen
 
 - Python 3.10 oder neuer
-- Internetverbindung *nur für den ersten Start* (zum automatischen Herunterladen des Modells von Hugging Face in den lokalen Cache)
-- Keine GPU nötig, läuft extrem performant auf normaler CPU
+- Internetverbindung nur beim ersten Modell-Download
+- Keine GPU erforderlich
 
 ---
 
-## Installation
+# Installation
+
+## 1. Virtuelle Umgebung erstellen
 
 ```powershell
-# 1. Virtual Environment erstellen und aktivieren
 python -m venv venv
-venv\Scripts\activate
+```
 
-# 2. Alle benötigten Pakete installieren
+## 2. Umgebung aktivieren
+
+```powershell
+venv\Scripts\activate
+```
+
+## 3. Abhängigkeiten installieren
+
+```powershell
 pip install -r requirements.txt
-Hinweis: Bei der Installation über die angepasste requirements.txt wird gezielt die CPU-Version von torch sowie transformers, sentencepiece und sacremoses eingerichtet. Dies sichert eine schlanke, ressourcenschonende lokale Laufzeitumgebung ab und stabilisiert die Tokenisierung.Dateien in diesem ModulDateiBeschreibungconfig.pyZentrale Konfigurationsdatei für Modellnamen, Pfade und Token-Längen.models.pyVerwaltet das Laden des Modells via Hugging Face im ressourceneffizienten Singleton-Pattern.utils.pyEnthält die Textbereinigung (OCR-Korrektur) und die logische Satz-Segmentierung.service.pyDer Kern-Übersetzungsdienst, welcher die Vorverarbeitung und Modell-Inferenz steuert.translate.pyHaupt-Einstiegspunkt: Bietet das CLI für die Konsole und die zentrale Schnittstelle für die Gruppen-Pipeline.test_translation.pyAutomatisiertes Testskript zur Validierung des Moduls mit realen Fachbegriffen aus dem Anlagenbau.app_gesamt.pyGemeinsame Web-App für alle Module (Streamlit-Oberfläche).modul_d_stub.pyDie Übergangs-Schnittstelle (Stub) für die Pipeline-Integration während der Entwicklungsphase.Verwendung – KommandozeileSchritt 1: Text direkt ins Englische übersetzenDu kannst einen Textabschnitt direkt über die Konsole übergeben, um die Übersetzung live zu prüfen:PowerShellpython translate.py --text "Die Montage der Kreiselpumpe muss gemäß der technischen Spezifikation erfolgen."
-Schritt 2: Validierung des Moduls ausführenUm die semantische Präzision und Geschwindigkeit des Modells mit echten, komplexen Fachbegriffen aus dem industriellen Anlagenbau automatisiert zu prüfen:PowerShellpython test_translation.py
-Web-App startenFür die Präsentation und den normalen Betrieb gibt es eine einheitliche Web-Oberfläche:PowerShellstreamlit run app_gesamt.py
-Der Browser öffnet sich automatisch auf http://localhost:8501.Im Tab D (Übersetzungsmodul) ist mein System voll funktionsfähig eingebettet. Du kannst dort beliebige Texte hineinkopieren oder hochladen, und die Übersetzung ins Englische wird lokal in Echtzeit generiert.Ergebnisse & EvaluationDas System wurde im Rahmen der domänenspezifischen Validierung intensiv mit realen technischen Dokumenten und Vorlagen evaluiert:Unterstützte Sprachrichtung: Reine lokale Inferenz-Pipeline für die Übersetzung von Deutsch nach Englisch (DE-EN).Semantische Präzision: Das Modell bewies eine durchgehend hohe Treffsicherheit bei der automatisierten Übertragung zusammengesetzter Fachbegriffe (z.B. Inbetriebnahme -> commissioning, Kreiselpumpe -> centrifugal pump). Damit ist die fehlerfreie Datenqualität für die anschließende Weiterverarbeitung garantiert.Ressourcenbedarf:Modellgröße: Kompakte ~298 MB für das Übersetzungsmodell.RAM-Verbrauch: Extrem geringer Fußabdruck, perfekt optimiert für Standard-Büro-Hardware (Modell wird via Singleton nur einmal geladen).Laufzeit: Nach dem initialen Caching liegt die Inferenzzeit bei 0.1 bis 0.2 Sekunden pro Satz auf einer Standard-CPU.Technische EntscheidungenEin paar Dinge, die ich bewusst so gemacht habe und warum:Modellauswahl (Helsinki-NLP/opus-mt-de-en): Ich verwende ein spezialisiertes neuronales Übersetzungsmodell (Marian NMT) via Hugging Face, das exakt auf die Übersetzung von Deutsch nach Englisch trainiert ist. Mit knapp 298 MB ist es winzig, läuft rasend schnell auf CPUs und liefert eine hervorragende Qualität ohne Internetverbindung.Vorverarbeitung & Textbereinigung (utils.py): Da aus OCR-Prozessen stammende Texte oft unsaubere Formatierungen, Zerstückelungen oder doppelte Zeilenumbrüche enthalten, durchlaufen die Daten eine Bereinigungspipeline. Der Text wird zudem logisch segmentiert, damit das Modell den Kontext optimal erfasst.Standardisiertes Ausgabeformat: Um eine fehlerfreie Übergabe an nachgelagerte Systeme oder Datenbanken zu garantieren, liefert mein Modul die Daten in einem fest definierten Python-Dictionary zurück:Python{
+```
+
+### Hinweis
+
+Die `requirements.txt` installiert gezielt:
+
+- CPU-Version von `torch`
+- `transformers`
+- `sentencepiece`
+- `sacremoses`
+
+Dadurch bleibt das System ressourcenschonend und stabil für lokale Übersetzungen.
+
+---
+
+# Projektstruktur
+
+```plaintext
+Translation-modell/
+├── model_cache/           # Lokaler Modell-Cache (~298 MB)
+├── config.py              # Zentrale Konfiguration
+├── models.py              # Singleton-Modellverwaltung
+├── utils.py               # OCR-Bereinigung & Segmentierung
+├── service.py             # Übersetzungsdienst
+├── translate.py           # CLI & Pipeline-Schnittstelle
+├── test_translation.py    # Automatisierter Test
+├── requirements.txt       # CPU-optimierte Abhängigkeiten
+├── modul_d_stub.py        # Team-Integrationsstub
+└── app_gesamt.py          # Gemeinsame Streamlit-Web-App
+```
+
+---
+
+# Dateien im Detail
+
+| Datei | Beschreibung |
+|---|---|
+| `config.py` | Modellnamen, Pfade und Parameter |
+| `models.py` | Lädt das Modell ressourcenschonend im Singleton-Pattern |
+| `utils.py` | OCR-Korrektur und Satzsegmentierung |
+| `service.py` | Kernlogik der Übersetzung |
+| `translate.py` | CLI-Einstiegspunkt und Pipeline-Schnittstelle |
+| `test_translation.py` | Validierung mit technischen Fachbegriffen |
+| `app_gesamt.py` | Gemeinsame Streamlit-Web-App |
+| `modul_d_stub.py` | Temporäre Pipeline-Schnittstelle |
+
+---
+
+# Verwendung
+
+## Direkte Übersetzung über die Konsole
+
+```powershell
+python translate.py --text "Die Montage der Kreiselpumpe muss gemäß der technischen Spezifikation erfolgen."
+```
+
+---
+
+## Modul testen
+
+```powershell
+python test_translation.py
+```
+
+Das Testskript überprüft:
+
+- Übersetzungsqualität
+- Fachbegriffserkennung
+- Laufzeit
+- Stabilität der Pipeline
+
+---
+
+# Streamlit-Web-App starten
+
+```powershell
+streamlit run app_gesamt.py
+```
+
+Die Anwendung startet anschließend unter:
+
+```plaintext
+http://localhost:8501
+```
+
+Im Tab **„Modul D – Übersetzung“** kann Text direkt eingegeben oder hochgeladen werden.
+
+---
+
+# Beispielausgabe
+
+Das Modul liefert standardisierte Datenstrukturen zurück:
+
+```python
+{
     "original": "Text in der Originalsprache",
-    "translated": "Übersetzter Text auf Englisch",
-    "language": "en"  # Ziel-Sprachcode
+    "translated": "Translated English text",
+    "language": "en"
 }
-Integration mit dem GesamtsystemDas Modul ist so gebaut, dass es sich nahtlos in die gemeinsame Pipeline einfügt. Es nimmt den digitalisierten Text auf, verarbeitet ihn und gibt das oben gezeigte standardisierte Dictionary an das System weiter. Dadurch können Dokumente auch in englischer Sprache für den Chatbot indiziert werden.In der zentralen Steuerungsdatei ingest_pipeline.py wurde mein echtes Modul anstelle des alten Stubs aktiviert:Python# Integration in die zentrale Pipeline
-from modul_d import uebersetze  # Aktiviert nach erfolgreicher Modul-Validierung!
-Bekannte EinschränkungenStilistische Feinheiten: Die Qualität ist perfekt für das inhaltliche Fachverständnis. Für rechtlich hochgradig bindende, vertragliche Dokumente wird dennoch eine kurze menschliche Nachbearbeitung empfohlen.Formatierungsverlust bei Tabellen: Stark verschachtelte Tabellenlayouts werden flach als fortlaufende Textsegmente übersetzt, wodurch die rein visuelle Tabellenstruktur im Zieltext leicht verzerrt werden kann.OrdnerstrukturPlaintextTranslastion-modell/
-├── model_cache/           # Lokaler Cache-Ordner für die Gewichte der KI (~298 MB)
-├── config.py              # Konfiguration des Modellnamens und der Parameter
-├── models.py              # Singleton-Klasse zum RAM-schonenden Laden des Modells
-├── utils.py               # Funktionen für OCR-Textbereinigung und Satz-Segmentierung
-├── service.py             # Eigentlicher Übersetzungsdienst
-├── translate.py           # Hauptskript mit CLI für Konsole & Pipeline-Anbindung
-├── test_translation.py    # Automatisierter Integrationstest mit PM-Fachbegriffen
-├── requirements.txt       # CPU-optimierte Abhängigkeiten (torch, transformers, etc.)
-├── modul_d_stub.py        # Integrations-Stub für das Team
-└── app_gesamt.py          # Gemeinsame Web-App aller Module (Streamlit)
+```
+
+---
+
+# Technische Entscheidungen
+
+## Modellwahl
+
+Verwendetes Modell:
+
+```plaintext
+Helsinki-NLP/opus-mt-de-en
+```
+
+Vorteile:
+
+- Speziell für Deutsch → Englisch trainiert
+- Sehr kompakt (~298 MB)
+- Schnell auf CPU
+- Offline nutzbar
+- Gute Fachbegriffserkennung
+
+---
+
+## OCR-Textbereinigung
+
+Da OCR-Texte häufig:
+
+- Zeilenumbrüche
+- Trennfehler
+- doppelte Leerzeichen
+- zerstückelte Sätze
+
+enthalten, werden die Inhalte vor der Übersetzung automatisch bereinigt.
+
+---
+
+## Singleton-Modellverwaltung
+
+Das Modell wird nur einmal geladen und anschließend wiederverwendet.
+
+Vorteile:
+
+- geringer RAM-Verbrauch
+- schnellere Inferenz
+- stabile Laufzeit
+
+---
+
+# Evaluation
+
+## Unterstützte Sprachrichtung
+
+```plaintext
+Deutsch → Englisch (DE-EN)
+```
+
+---
+
+## Fachliche Präzision
+
+Das Modell erkennt technische Begriffe zuverlässig:
+
+| Deutsch | Englisch |
+|---|---|
+| Inbetriebnahme | commissioning |
+| Kreiselpumpe | centrifugal pump |
+| Rohrleitungsanlage | piping system |
+| Druckbehälter | pressure vessel |
+
+---
+
+## Performance
+
+| Eigenschaft | Wert |
+|---|---|
+| Modellgröße | ~298 MB |
+| RAM-Verbrauch | gering |
+| GPU erforderlich | Nein |
+| Inferenzzeit | ~0.1–0.2 Sekunden pro Satz |
+
+---
+
+# Integration in die Gesamtpipeline
+
+Nach erfolgreicher Validierung wurde das echte Modul aktiviert:
+
+```python
+from modul_d import uebersetze
+```
+
+Das Modul verarbeitet OCR-Texte und liefert standardisierte Ergebnisse an die zentrale Pipeline zurück.
+
+---
+
+# Bekannte Einschränkungen
+
+## Stilistische Feinheiten
+
+Für rechtlich bindende Verträge wird weiterhin eine menschliche Nachkontrolle empfohlen.
+
+---
+
+## Tabellenformatierung
+
+Komplexe Tabellenstrukturen können nach der Übersetzung visuell vereinfacht dargestellt werden.
+
+---
+
+# Zusammenfassung
+
+Dieses Modul bietet eine schnelle, DSGVO-konforme und vollständig lokale Übersetzungslösung für technische Dokumente im industriellen Umfeld.
+
+Die Kombination aus:
+
+- OCR-Bereinigung
+- CPU-optimierter KI
+- lokaler Inferenz
+- sauberer Pipeline-Integration
+
+macht das System besonders geeignet für sensible Unternehmensdaten ohne Cloud-Abhängigkeit.
