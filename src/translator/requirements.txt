@@ -1,8 +1,8 @@
 # requirements.txt
 # Kern-Bibliotheken für das lokale Übersetzungsmodul (Modul D)
 
-# PyTorch (CPU-Version für ressourceneffiziente lokale Inferenz)
-torch --index-url https://download.pytorch.org/whl/cpu
+# PyTorch mit CUDA-Support für NVIDIA RTX 4070
+torch --index-url https://download.pytorch.org/whl/cu121
 
 # Hugging Face Transformers für den Zugriff auf das MarianMT-Modell
 transformers
