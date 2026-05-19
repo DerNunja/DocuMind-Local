@@ -1,0 +1,25 @@
+# ERWARTETE KATEGORIE: Besprechungsprotokolle
+# SCHWIERIGKEIT: leicht
+Besprechungsprotokoll Jour fixe
+Projekt ChemTech-Reaktor
+
+Datum: 16.04.2026, 09:00 bis 10:20 Uhr
+Ort: Microsoft Teams
+Protokoll: Sandra Krause
+
+Teilnehmende: Thomas Berger (Nordharz Anlagenbau GmbH, Projektleiter), Sandra Krause (Nordharz Anlagenbau GmbH, Projektingenieurin), Dr. Martin Heine (ChemTech Sachsen AG, Betriebstechnik), Anja Feldmann (ChemTech Sachsen AG, Qualitaetssicherung), Ralf Voigt (Steuerungstechnik Voigt GmbH).
+
+Tagesordnung:
+1. Rueckblick auf die Konstruktionsfreigabe
+2. Status Fertigung Reaktormantel und Ruehrwerksaufnahme
+3. Elektro- und Steuerungskonzept
+4. Offene Kundendokumentation
+5. Termine und naechste Schritte
+
+Zu TOP 1 wurde festgehalten, dass die Freigabezeichnung CT-R-204-A am 12.04.2026 durch ChemTech Sachsen AG bestaetigt wurde. Aenderungen an den Stutzen N4 und N7 sind bereits in Revision B eingearbeitet.
+
+Beschluesse: Die Sicherheitsverriegelung fuer den Wartungsdeckel wird zweikanalig ausgefuehrt. ChemTech Sachsen AG akzeptiert die geaenderte Position des Temperaturfuehlers TIR-203, sofern die Zugangswege fuer Kalibrierung erhalten bleiben. Steuerungstechnik Voigt GmbH erstellt bis 23.04.2026 eine aktualisierte I/O-Liste.
+
+Massnahmen: Sandra Krause prueft die Materialzeugnisse fuer 1.4571 und sendet eine Uebersicht an Anja Feldmann. Thomas Berger klaert mit Armaturen Koch KG die Lieferzeit fuer die DN80-Sicherheitsarmatur. Dr. Heine stellt bis Freitag die interne Explosionsschutzbewertung zur Verfuegung.
+
+Naechster Jour fixe: 30.04.2026, 09:00 Uhr. Das Protokoll gilt als genehmigt, sofern bis 19.04.2026 keine Einwaende eingehen.

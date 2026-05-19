@@ -1,0 +1,17 @@
+# ERWARTETE KATEGORIE: Projektstatusberichte
+# SCHWIERIGKEIT: leicht
+Projektstatusbericht April 2026
+Projekt Polagromat-Abfuellung
+Kunde: Polagromat Sp. z o.o., Poznan
+Berichtsstand: 30.04.2026
+Erstellt von: Thomas Berger, Nordharz Anlagenbau GmbH
+
+Gesamtstatus: gelb. Das Projekt befindet sich weiterhin im freigegebenen Budgetrahmen, zeigt jedoch terminliche Risiken im Bereich Elektromontage und FAT-Vorbereitung. Der geplante Liefertermin an Polagromat Sp. z o.o. am 17.06.2026 ist derzeit noch erreichbar, erfordert aber eine beschleunigte Klaerung der offenen Schnittstellen zur kundenseitigen Etikettierung.
+
+Meilensteinuebersicht: Engineering abgeschlossen am 08.04.2026. Mechanische Vormontage der Abfuellstation zu 70 % abgeschlossen. Schaltschrankfertigung bei Steuerungstechnik Voigt GmbH gestartet, Fertigstellung geplant fuer 18.05.2026. Interner Funktionstest bei Nordharz Anlagenbau GmbH vorgesehen ab 27.05.2026. FAT mit Polagromat ist fuer 04.06.2026 reserviert.
+
+Erreichte Ergebnisse im Berichtsmonat: Die Dosierlanzen wurden nach Kundenfreigabe in Edelstahl 1.4404 gefertigt. Die produktberuehrten Dichtungen sind gemaess Spezifikation in FKM ausgefuehrt. Die polnische Bedienoberflaeche ist in der ersten Version implementiert und wird aktuell durch Polagromat geprueft.
+
+Offene Punkte: Finales Layout der Etikettiermaschine fehlt. Rueckmeldung zu den Medienanschluessen Druckluft und Reinigungswasser ist noch nicht eingegangen. Markus Foerster wartet auf die Versandfreigabe fuer zwei pneumatische Armaturen von Armaturen Koch KG.
+
+Risikohinweis: Bei weiterer Verzoegerung der Etikettierdaten um mehr als eine Woche verschiebt sich die gemeinsame Linienintegration. Empfohlen wird ein kurzfristiger Abstimmungstermin mit Polagromat und dem Etikettierlieferanten.

@@ -1,0 +1,17 @@
+# ERWARTETE KATEGORIE: Abnahmeprotokolle
+# SCHWIERIGKEIT: mittel
+Protokoll Abstimmungstermin und Teilabnahme
+Projekt ChemTech-Reaktor
+Kunde: ChemTech Sachsen AG
+Datum: 06.05.2026, 13:00 bis 15:15 Uhr
+Ort: ChemTech Sachsen AG, Werk Radebeul, Besprechungsraum 2 und Technikum
+
+Teilnehmende: Thomas Berger und Sandra Krause fuer Nordharz Anlagenbau GmbH, Dr. Martin Heine und Anja Feldmann fuer ChemTech Sachsen AG, Ralf Voigt fuer Steuerungstechnik Voigt GmbH.
+
+Zu Beginn wurden die Testergebnisse des kalten Funktionstests besprochen. Die Ruehrwerksverriegelung, der Temperaturregelkreis TIR-203 und die Abschaltung bei geoeffnetem Wartungsdeckel wurden anhand der Protokolldateien vom 05.05.2026 erlaeutert. ChemTech Sachsen AG stellte Rueckfragen zur Plausibilisierung des Grenzwertes fuer die Manteltemperatur. Sandra Krause sagte zu, die Berechnungsnotiz bis 09.05.2026 nachzureichen.
+
+Im Anschluss erfolgte die gemeinsame Begehung der vormontierten Reaktoreinheit im Technikum. Geprueft wurden die Beschilderung der Stutzen, die Zugangsmoeglichkeit zu den Sensoren, die Erdungsanschluesse und die Dokumentation der Druckpruefung. Die Materialzeugnisse fuer Mantel, Boden und produktberuehrte Stutzen lagen vollstaendig vor. Die Kennzeichnung von Anschluss N7 war noch mit der alten Bezeichnung versehen.
+
+Teilabnahme: ChemTech Sachsen AG nimmt die mechanische Vormontage des Reaktors unter Vorbehalt der Umkennzeichnung N7 und Nachreichung der Berechnungsnotiz ab. Die elektrotechnische Gesamtfreigabe ist nicht Gegenstand dieses Termins und bleibt bis zum FAT offen.
+
+Beschluesse und Massnahmen: Nordharz Anlagenbau GmbH tauscht das Schild N7 bis 08.05.2026. Steuerungstechnik Voigt GmbH aktualisiert die Signalliste. Der naechste Abstimmungstermin findet am 20.05.2026 statt.

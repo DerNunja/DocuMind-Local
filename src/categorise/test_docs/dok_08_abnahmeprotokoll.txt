@@ -1,0 +1,17 @@
+# ERWARTETE KATEGORIE: Abnahmeprotokolle
+# SCHWIERIGKEIT: leicht
+Abnahmeprotokoll Funktionspruefung
+Anlage: Abfuell- und Verschliesseinheit DF-12
+Kunde: Deltafood B.V., Eindhoven
+Ort der Pruefung: Werk Nordharz Anlagenbau GmbH, Goslar
+Datum: 28.04.2026
+
+Teilnehmende: Thomas Berger (Nordharz Anlagenbau GmbH), Sandra Krause (Nordharz Anlagenbau GmbH), Pieter van Dijk (Deltafood B.V.), Marieke Jansen (Deltafood B.V., Qualitaet).
+
+Pruefumfang: Mechanische Funktion der Behaelterzufuehrung, Dosiergenauigkeit bei drei Produktviskositaeten, Verschliessmoment der Schraubkappen, Sicherheitsfunktionen der Schutztueren sowie Reinigungsprogramm im Trockenlauf. Grundlage waren Angebot NA-25-884 und Spezifikation DF-12-REV3.
+
+Pruefergebnisse: Die Behaelterzufuehrung erreichte im Dauerlauf 58 Takte pro Minute bei geforderter Mindestleistung von 55 Takten pro Minute. Die Dosierabweichung lag bei 250 ml Sollvolumen zwischen minus 0,7 % und plus 0,6 %. Das Verschliessmoment wurde mit 1,25 bis 1,34 Nm gemessen und liegt innerhalb der freigegebenen Toleranz. Alle Not-Halt-Taster und Schutztuerkontakte fuehrten zum sicheren Stopp innerhalb der dokumentierten Nachlaufzeit.
+
+Festgestellte Abweichungen: An der Fuehrungsschiene Einlauf links ist eine Kante nachzuarbeiten. Die niederlaendische Uebersetzung der Meldung 143 ist unvollstaendig. Beide Punkte sind nicht abnahmeverhindernd und werden vor Versand erledigt.
+
+Freigabevermerk: Deltafood B.V. erteilt die technische Freigabe fuer Verpackung und Versand nach Abschluss der genannten Restpunkte. Die Funktionspruefung gilt als bestanden. Unterschriften erfolgten vor Ort auf der Originalausfertigung.

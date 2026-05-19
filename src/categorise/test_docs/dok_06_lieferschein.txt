@@ -1,0 +1,28 @@
+# ERWARTETE KATEGORIE: Lieferscheine
+# SCHWIERIGKEIT: leicht
+Lieferschein Nr. NA-LS-2026-077
+Nordharz Anlagenbau GmbH
+Am Kupferhammer 7, 38640 Goslar
+
+Empfaenger:
+Polagromat Sp. z o.o.
+ul. Przemyslowa 14
+60-001 Poznan, Polen
+
+Projekt: Polagromat-Abfuellung
+Versanddatum: 12.05.2026
+Spedition: HarzLogistik GmbH
+Incoterms: DAP Poznan
+
+Hiermit liefern wir Steuerungskomponenten fuer die Abfuelllinie gemaess Bestellung PO-PL-5581 und unserer Auftragsbestaetigung AB-26-309. Die Ware ist fuer den Einbau in die von Nordharz Anlagenbau GmbH gelieferte Dosier- und Verschliesseinheit bestimmt.
+
+Packliste:
+Kolli 1, Holzkiste 1200 x 800 x 900 mm, Bruttogewicht 148 kg: Schaltschrank-Nebenfeld SF-02, vormontiert, Seriennummer NV-SF02-260512, inklusive Klemmleistenplan und Pruefaufkleber.
+
+Kolli 2, Kartonage auf Europalette, Bruttogewicht 64 kg: 6 Stueck Frequenzumrichter 0,75 kW, 4 Stueck Sicherheitsrelais, 18 Stueck induktive Naeherungsschalter M12, 12 Stueck M12-Verbindungsleitungen 5 m, 1 Stueck Panel-PC 12 Zoll mit polnischer Bedienoberflaeche.
+
+Kolli 3, Dokumentenmappe: Stromlaufplan Revision C, I/O-Liste Revision B, CE-Einbauer klaerung fuer unvollstaendige Maschine, Verpackungsnachweis.
+
+Zoll- und Warenangaben: Ursprungsland Deutschland. Warentarifnummer 85371098 fuer Schaltschrank und 85365080 fuer Sensorik und Schaltgeraete. Warenwert fuer statistische Zwecke: 18.740,00 EUR netto. Keine Gefahrgutklassifizierung.
+
+Die Sendung wurde aeusserlich unbeschaedigt an den Frachtfuehrer uebergeben. Empfang bitte mit Datum, Unterschrift und Stempel bestaetigen.

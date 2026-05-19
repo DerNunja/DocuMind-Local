@@ -7,7 +7,15 @@ wheels/
 *.egg-info
 
 myPlan.md
+myPlanEn.md
+usage.md
 Ruff_Plan.md
+architecture.md
+critic.md
+
 
 # Virtual environments
 .venv
+.documind/
+examples_tests/
+test_docs_nosolution/

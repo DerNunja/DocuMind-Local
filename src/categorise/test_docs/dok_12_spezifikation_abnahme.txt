@@ -1,0 +1,15 @@
+# ERWARTETE KATEGORIE: Technische Spezifikationen
+# SCHWIERIGKEIT: mittel
+Kurzspezifikation mit Pruefnachweis
+Anlage: Dosierstation DS-04
+Kunde: Deltafood B.V.
+Erstellt durch: Sandra Krause, Nordharz Anlagenbau GmbH
+Datum: 11.05.2026
+
+Sollanforderungen: Die Dosierstation DS-04 ist fuer fluessige Aromakomponenten mit einer Viskositaet bis 1.500 mPa s auszulegen. Gefordert ist ein Dosierbereich von 50 bis 500 ml je Takt bei einer Wiederholgenauigkeit von besser als plus/minus 1,0 %. Produktberuehrte Teile sind in Edelstahl 1.4404 auszufuehren, Dichtungen in FKM. Die Anlage muss mit 400 V, 50 Hz betrieben werden und ueber eine Ethernet-Schnittstelle an die kundenseitige Liniensteuerung angebunden sein.
+
+Sicherheits- und Bedienanforderungen: Der Produktbehaelter ist mit Minimalstandsmeldung auszustatten. Bei geoeffneter Schutzhaube darf kein Dosierhub ausgeloest werden. Alle Bedienmeldungen sind in deutscher und niederlaendischer Sprache verfuegbar zu machen. Reinigung erfolgt im halbautomatischen Spuelprogramm mit warmem Wasser.
+
+Pruefergebnisse am 11.05.2026: Die Dosiermenge wurde mit Wasser und einer Referenzfluessigkeit bei 20 Grad Celsius geprueft. Bei Sollwert 100 ml lagen zehn Messungen zwischen 99,3 ml und 100,8 ml. Bei Sollwert 500 ml lagen die Messwerte zwischen 496,2 ml und 503,7 ml. Die Schutzhaubenverriegelung unterbrach den Dosierzyklus in allen drei Testlaeufen. Die Minimalstandsmeldung wurde durch Absenken des Schwimmerschalters erfolgreich ausgeloest.
+
+Abweichungen: Die niederlaendische Meldung fuer "Behaelter leer" ist noch nicht freigegeben. Deltafood B.V. liefert die finale Formulierung bis 14.05.2026. Die technische Ausfuehrung entspricht ansonsten den oben genannten Anforderungen. Die Dosierstation wird fuer die Integration in die Gesamtanlage freigegeben.

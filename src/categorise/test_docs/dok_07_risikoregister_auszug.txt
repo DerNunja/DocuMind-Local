@@ -1,0 +1,30 @@
+# ERWARTETE KATEGORIE: Risikoregister
+# SCHWIERIGKEIT: leicht
+Auszug Risikoregister
+Projekt Harzmilch-Linie3
+Stand: 22.04.2026
+Verantwortlich: Thomas Berger, Nordharz Anlagenbau GmbH
+
+R-014: Verzoegerte Lieferung der Kreiselpumpen
+Beschreibung: Schultze Pumpen GmbH meldete eine hohe Auslastung in der Endmontage. Bei spaeter Lieferung kann die Montage der CIP-Pumpengruppe nicht wie geplant starten.
+Eintrittswahrscheinlichkeit: mittel. Auswirkung: hoch. Bewertung: 12 von 25.
+Massnahme: Markus Foerster verfolgt den Liefertermin zweimal woechentlich. Alternativpumpe wurde technisch geprueft, bleibt aber nur Rueckfalloption.
+Status: offen, naechste Bewertung am 29.04.2026.
+
+R-019: Unzureichende Zugangswege im Bestand
+Beschreibung: Im Technikraum der Harzer Milchwerke GmbH sind die vorhandenen Rohrbruecken niedriger als in den Bestandsplaenen angegeben. Dadurch koennte die Montage der Ventilgruppe erschwert werden.
+Eintrittswahrscheinlichkeit: hoch. Auswirkung: mittel. Bewertung: 15 von 25.
+Massnahme: Sandra Krause erstellt bis 24.04.2026 eine geaenderte Aufstellskizze. Entscheidung mit Kunde im Baustellentermin.
+Status: in Bearbeitung.
+
+R-022: Produktionsunterbrechung beim Kunden
+Beschreibung: Die Umschlussarbeiten muessen in einem engen Stillstandsfenster der Linie 2 erfolgen. Eine Verlaengerung haette direkte Auswirkungen auf den Betrieb der Harzer Milchwerke GmbH.
+Eintrittswahrscheinlichkeit: niedrig. Auswirkung: sehr hoch. Bewertung: 10 von 25.
+Massnahme: Detaillierter Ablaufplan mit Vorfertigung aller Rohrsegmente, zusaetzlicher Monteur in Bereitschaft.
+Status: akzeptiert mit Massnahmen.
+
+R-026: Hygienische Abnahme der Schweissnaehte
+Beschreibung: Beanstandungen an orbital geschweissten Rohrleitungen koennen Nacharbeit und erneute Endoskopie verursachen.
+Eintrittswahrscheinlichkeit: mittel. Auswirkung: mittel. Bewertung: 9 von 25.
+Massnahme: Zwischenpruefung vor Druckprobe durch Qualitaetssicherung Nordharz.
+Status: offen.
