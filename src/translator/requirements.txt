@@ -1,0 +1,15 @@
+# requirements.txt
+# Kern-Bibliotheken für das lokale Übersetzungsmodul (Modul D)
+
+# PyTorch mit CUDA-Support für NVIDIA RTX 4070
+torch --index-url https://download.pytorch.org/whl/cu121
+
+# Hugging Face Transformers für den Zugriff auf das MarianMT-Modell
+transformers
+
+# Tokenizer-Abhängigkeiten für die Textverarbeitung des Modells
+sentencepiece
+sacremoses
+
+# Streamlit (wird für die gemeinsame Web-Oberfläche der Gruppe benötigt)
+streamlit
