@@ -119,8 +119,8 @@ Getestet mit 8 Projektdokumenten (Statusberichte, Meeting-Protokolle, Risikoregi
 
 | Modell | Ø Score | Ø Antwortzeit | RAM |
 |---|---|---|---|
-| Llama 3.1 8B | 80% | 90.3s | ~4.9 GB |
-| Phi-3.5 Mini | 85% | 48.0s | ~2.2 GB |
+| Llama 3.1 8B | 85% | 90.3s | ~4.9 GB |
+| Phi-3.5 Mini | 80% | 48.0s | ~2.2 GB |
 
 Phi-3.5 ist bei kurzen, strukturierten PM-Dokumenten überraschenderweise besser als Llama 3.1 und gleichzeitig fast doppelt so schnell. Llama 3.1 zeigt seinen Vorteil eher bei langen, komplexen Dokumenten.
 
