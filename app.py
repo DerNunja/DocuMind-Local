@@ -358,31 +358,119 @@ def render_categorisation() -> None:
         categories = service.store.load_categories()
         st.metric("Kategorien", len(categories))
 
+    st.divider()
+    st.subheader("Dokumente kategorisieren")
+
     if st.session_state.documents and st.button("Geladene Dokumente kategorisieren", type="primary"):
         run_categorisation(st.session_state.documents)
 
-    if not st.session_state.category_results:
-        st.info("Keine Kategorisierungsergebnisse vorhanden.")
-        return
+    uploaded_files = st.file_uploader(
+        "Dokumente direkt für Modul A hochladen",
+        type=["txt", "pdf", "docx"],
+        accept_multiple_files=True,
+        key="categorise_upload",
+    )
+    if uploaded_files and st.button("Hochgeladene Dokumente kategorisieren", type="primary"):
+        extracted = []
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            for uploaded_file in uploaded_files:
+                file_path = save_uploaded_file(uploaded_file, tmp_path)
+                extracted.append(extract_document(file_path))
+        run_categorisation(extracted)
 
-    for key, result in st.session_state.category_results.items():
-        if result.get("error"):
-            st.error(f"{key}: {result['error']}")
-            continue
-        record = result["record"]
-        title = f"{record.filename} · {record.status} · {result.get('category') or 'keine Kategorie'}"
-        with st.expander(title):
-            if record.profile:
+    if st.session_state.category_results:
+        st.subheader("Aktuelle Kategorisierungsergebnisse")
+        for key, result in st.session_state.category_results.items():
+            if result.get("error"):
+                st.error(f"{key}: {result['error']}")
+                continue
+            record = result["record"]
+            title = f"{record.filename} · {record.status} · {result.get('category') or 'keine Kategorie'}"
+            with st.expander(title):
+                if record.profile:
+                    st.write("**Zusammenfassung**")
+                    st.write(record.profile.summary)
+                    st.write("**Dokumenttyp**", record.profile.document_type)
+                if record.decision:
+                    st.write("**Begründung**")
+                    st.write(record.decision.rationale)
+                    if record.decision.proposed_tags:
+                        st.json(record.decision.proposed_tags)
+                if record.errors:
+                    st.error("; ".join(record.errors))
+    else:
+        st.info("Noch keine aktuellen Kategorisierungsergebnisse vorhanden.")
+
+    st.divider()
+    st.subheader("Gespeicherte Dokumente")
+    documents = service.store.load_documents()
+    categories_by_id = category_name_map(service)
+    if not documents:
+        st.info("Noch keine Dokumente in PostgreSQL gespeichert.")
+    else:
+        st.dataframe(
+            [
+                {
+                    "Datei": document.filename,
+                    "Status": document.status,
+                    "Kategorie": categories_by_id.get(document.primary_category_id or "", ""),
+                    "Kategorie-ID": document.primary_category_id or "",
+                    "Erstellt": document.created_at,
+                }
+                for document in documents
+            ],
+            use_container_width=True,
+            hide_index=True,
+        )
+
+        with st.expander("Details gespeicherter Dokumente"):
+            selected_filename = st.selectbox(
+                "Dokument",
+                [document.filename for document in documents],
+                key="stored_category_doc",
+            )
+            selected = next(document for document in documents if document.filename == selected_filename)
+            st.write("**Status**", selected.status)
+            st.write("**Kategorie**", categories_by_id.get(selected.primary_category_id or "", ""))
+            if selected.profile:
                 st.write("**Zusammenfassung**")
-                st.write(record.profile.summary)
-                st.write("**Dokumenttyp**", record.profile.document_type)
-            if record.decision:
+                st.write(selected.profile.summary)
+            if selected.decision:
                 st.write("**Begründung**")
-                st.write(record.decision.rationale)
-                if record.decision.proposed_tags:
-                    st.json(record.decision.proposed_tags)
-            if record.errors:
-                st.error("; ".join(record.errors))
+                st.write(selected.decision.rationale)
+                if selected.decision.proposed_tags:
+                    st.json(selected.decision.proposed_tags)
+            if selected.errors:
+                st.error("; ".join(selected.errors))
+
+    st.divider()
+    st.subheader("Taxonomie-Reviews")
+    taxonomy_reviews = [document for document in documents if document.status == "needs_taxonomy_review"]
+    if not taxonomy_reviews:
+        st.info("Keine offenen Taxonomie-Reviews.")
+    else:
+        st.dataframe(
+            [
+                {
+                    "Datei": document.filename,
+                    "Vorgeschlagene Kategorie": (
+                        document.decision.none_fits_proposal.name
+                        if document.decision and document.decision.none_fits_proposal
+                        else ""
+                    ),
+                    "Beschreibung": (
+                        document.decision.none_fits_proposal.description
+                        if document.decision and document.decision.none_fits_proposal
+                        else ""
+                    ),
+                    "Begründung": document.decision.rationale if document.decision else "",
+                }
+                for document in taxonomy_reviews
+            ],
+            use_container_width=True,
+            hide_index=True,
+        )
 
 
 def render_translation() -> None:
