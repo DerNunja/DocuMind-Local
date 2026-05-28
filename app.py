@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import subprocess
 import shutil
 import sys
 import tempfile
@@ -10,51 +9,21 @@ from pathlib import Path
 from typing import Any
 
 import streamlit as st
-import requests
+
+from src.RAGBot.lm_studio_rag import CHROMA_PATH, build_chain, chroma_count, ingest_texts
+from src.categorise.docker import ensure_postgres_docker
+from src.categorise.lm_studio import list_models
 
 
 ROOT = Path(__file__).resolve().parent
 RAGBOT_DIR = ROOT / "src" / "RAGBot"
 TRANSLATOR_DIR = ROOT / "src" / "translator"
-CHROMA_PATH = RAGBOT_DIR / "vectordb"
-COLLECTION = "projektdokumente"
-EMBEDDING_MODEL = "intfloat/multilingual-e5-small"
-POSTGRES_CONTAINER = "documind-postgres"
-POSTGRES_IMAGE = "pgvector/pgvector:pg16"
 DEFAULT_LM_STUDIO_BASE_URL = os.getenv("LM_STUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
 DEFAULT_CATEGORISER_CHAT_MODEL = os.getenv("LM_STUDIO_CHAT_MODEL", "google/gemma-4-e4b")
 DEFAULT_CATEGORISER_EMBEDDING_MODEL = os.getenv(
     "LM_STUDIO_EMBEDDING_MODEL", "text-embedding-qwen3-embedding-4b"
 )
-
-RAG_MODELS = {
-    "Phi-3.5 Mini (schneller)": {
-        "ollama_name": "phi3.5",
-        "k": 2,
-        "fetch_k": 6,
-        "num_predict": 180,
-        "num_ctx": 1024,
-    },
-    "Llama 3.1 8B (bessere Qualität)": {
-        "ollama_name": "llama3.1:8b",
-        "k": 4,
-        "fetch_k": 12,
-        "num_predict": 280,
-        "num_ctx": 2048,
-    },
-}
-
-RAG_PROMPT = """Du bist ein lokaler Projektmanagement-Assistent.
-Beantworte die Frage nur auf Basis der folgenden Dokument-Auszüge.
-Wenn keine relevante Information vorhanden ist, sage das klar.
-Antworte auf Deutsch, präzise und strukturiert.
-
-Dokument-Auszüge:
-{context}
-
-Frage: {question}
-
-Antwort:"""
+DEFAULT_RAG_CHAT_MODEL = os.getenv("LM_STUDIO_RAG_MODEL", DEFAULT_CATEGORISER_CHAT_MODEL)
 
 
 st.set_page_config(
@@ -86,14 +55,7 @@ def status_label(ok: bool, label: str) -> None:
 
 @st.cache_data(ttl=30, show_spinner=False)
 def list_lm_studio_models(base_url: str) -> list[str]:
-    response = requests.get(f"{base_url.rstrip('/')}/models", timeout=5)
-    response.raise_for_status()
-    data = response.json()
-    return sorted(
-        model["id"]
-        for model in data.get("data", [])
-        if isinstance(model, dict) and model.get("id")
-    )
+    return list_models(base_url=base_url, timeout=5)
 
 
 def model_options(models: list[str], selected: str) -> list[str]:
@@ -101,100 +63,6 @@ def model_options(models: list[str], selected: str) -> list[str]:
     if selected and selected not in options:
         options.insert(0, selected)
     return options or [selected]
-
-
-@st.cache_resource(show_spinner=False)
-def ensure_postgres_docker() -> dict[str, str | bool]:
-    if shutil.which("docker") is None:
-        return {"ok": False, "message": "Docker CLI wurde nicht gefunden."}
-
-    try:
-        inspect = subprocess.run(
-            ["docker", "inspect", POSTGRES_CONTAINER],
-            capture_output=True,
-            text=True,
-            timeout=8,
-            check=False,
-        )
-    except Exception as exc:
-        return {"ok": False, "message": f"Docker konnte nicht geprüft werden: {exc}"}
-
-    try:
-        if inspect.returncode == 0:
-            start = subprocess.run(
-                ["docker", "start", POSTGRES_CONTAINER],
-                capture_output=True,
-                text=True,
-                timeout=20,
-                check=False,
-            )
-            if start.returncode == 0:
-                return {"ok": True, "message": f"Container {POSTGRES_CONTAINER} läuft."}
-            message = (start.stderr or start.stdout).strip()
-            return {"ok": False, "message": f"Container konnte nicht gestartet werden: {message}"}
-
-        run = subprocess.run(
-            [
-                "docker",
-                "run",
-                "--name",
-                POSTGRES_CONTAINER,
-                "-e",
-                "POSTGRES_PASSWORD=postgres",
-                "-e",
-                "POSTGRES_DB=documind",
-                "-p",
-                "5432:5432",
-                "-d",
-                POSTGRES_IMAGE,
-            ],
-            capture_output=True,
-            text=True,
-            timeout=60,
-            check=False,
-        )
-        if run.returncode == 0:
-            return {"ok": True, "message": f"Container {POSTGRES_CONTAINER} wurde angelegt und gestartet."}
-        message = (run.stderr or run.stdout).strip()
-        return {"ok": False, "message": f"Container konnte nicht angelegt werden: {message}"}
-    except subprocess.TimeoutExpired:
-        return {"ok": False, "message": "Docker-Aufruf hat zu lange gedauert."}
-
-
-@st.cache_resource(show_spinner="Lade Embedding-Modell...")
-def load_embeddings():
-    from langchain_huggingface import HuggingFaceEmbeddings
-
-    return HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL,
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True},
-    )
-
-
-def load_chroma():
-    from langchain_chroma import Chroma
-
-    if not CHROMA_PATH.exists():
-        return None
-    db = Chroma(
-        persist_directory=str(CHROMA_PATH),
-        embedding_function=load_embeddings(),
-        collection_name=COLLECTION,
-    )
-    return db if db._collection.count() > 0 else None
-
-
-def chroma_count() -> int:
-    if not CHROMA_PATH.exists():
-        return 0
-    try:
-        import chromadb
-
-        client = chromadb.PersistentClient(path=str(CHROMA_PATH))
-        return client.get_collection(COLLECTION).count()
-    except Exception:
-        return 0
 
 
 def extract_document(path: Path) -> dict[str, Any]:
@@ -269,85 +137,6 @@ def translate_text(text: str) -> dict[str, str]:
     return service.übersetze_text(text)
 
 
-def ingest_texts_to_rag(documents: list[dict[str, Any]], reset: bool = False) -> int:
-    from langchain_chroma import Chroma
-    from langchain_core.documents import Document
-    from langchain_text_splitters import RecursiveCharacterTextSplitter
-
-    if reset and CHROMA_PATH.exists():
-        shutil.rmtree(CHROMA_PATH)
-
-    langchain_docs = []
-    for doc in documents:
-        text = doc.get("text", "").strip()
-        if len(text) < 50:
-            continue
-        metadata = {
-            "dateiname": doc.get("dateiname", "unbekannt"),
-            "dokument_key": doc.get("dokument_key", ""),
-            "quelle": doc.get("quelle", "documind-ui"),
-        }
-        if doc.get("category"):
-            metadata["kategorie"] = doc["category"]
-        if doc.get("language"):
-            metadata["sprache"] = doc["language"]
-        langchain_docs.append(Document(page_content=text, metadata=metadata))
-
-    if not langchain_docs:
-        return 0
-
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200,
-        separators=["\n\n", "\n", ". ", " ", ""],
-    )
-    chunks = splitter.split_documents(langchain_docs)
-    for chunk in chunks:
-        chunk.page_content = "passage: " + chunk.page_content
-
-    Chroma.from_documents(
-        documents=chunks,
-        embedding=load_embeddings(),
-        persist_directory=str(CHROMA_PATH),
-        collection_name=COLLECTION,
-    )
-    return len(chunks)
-
-
-def build_rag_chain(model_cfg: dict[str, Any]):
-    from langchain_classic.chains import RetrievalQA
-    from langchain_core.prompts import PromptTemplate
-    from langchain_ollama import OllamaLLM
-
-    db = load_chroma()
-    if db is None:
-        raise RuntimeError("Die RAG-Datenbank ist leer.")
-
-    retriever = db.as_retriever(
-        search_type="mmr",
-        search_kwargs={
-            "k": model_cfg["k"],
-            "fetch_k": model_cfg["fetch_k"],
-            "lambda_mult": 0.7,
-        },
-    )
-    llm = OllamaLLM(
-        model=model_cfg["ollama_name"],
-        temperature=0.1,
-        num_predict=model_cfg["num_predict"],
-        num_thread=8,
-        num_ctx=model_cfg["num_ctx"],
-    )
-    prompt = PromptTemplate(template=RAG_PROMPT, input_variables=["context", "question"])
-    return RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=retriever,
-        return_source_documents=True,
-        chain_type_kwargs={"prompt": prompt},
-    )
-
-
 def init_session_state() -> None:
     defaults = {
         "documents": [],
@@ -358,6 +147,7 @@ def init_session_state() -> None:
         "rag_model": None,
         "categoriser_base_url": DEFAULT_LM_STUDIO_BASE_URL,
         "categoriser_chat_model": DEFAULT_CATEGORISER_CHAT_MODEL,
+        "rag_chat_model": DEFAULT_RAG_CHAT_MODEL,
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -376,8 +166,22 @@ def render_sidebar() -> None:
         else:
             st.warning(str(docker_status["message"]))
         if st.button("PostgreSQL-Container erneut starten", use_container_width=True):
-            ensure_postgres_docker.clear()
             st.rerun()
+
+        st.divider()
+
+        st.subheader("LM Studio")
+        st.session_state.categoriser_base_url = st.text_input(
+            "Base URL",
+            value=st.session_state.categoriser_base_url,
+            help="Wird gemeinsam für Kategorisierung und RAG genutzt.",
+        )
+        try:
+            lm_models = list_lm_studio_models(st.session_state.categoriser_base_url)
+            st.success(f"{len(lm_models)} Modell(e) verfügbar")
+        except Exception as exc:
+            lm_models = []
+            st.warning(f"LM Studio nicht erreichbar: {exc}")
 
         st.divider()
 
@@ -394,11 +198,19 @@ def render_sidebar() -> None:
 
         st.divider()
         st.subheader("RAG-Modell")
-        model_name = st.selectbox("Ollama-Modell", list(RAG_MODELS.keys()))
+        rag_options = model_options(lm_models, st.session_state.rag_chat_model)
+        st.session_state.rag_chat_model = st.selectbox(
+            "LM Studio Modell",
+            rag_options,
+            index=rag_options.index(st.session_state.rag_chat_model),
+        )
         if st.button("Chat-Modell laden", use_container_width=True):
             try:
-                st.session_state.rag_chain = build_rag_chain(RAG_MODELS[model_name])
-                st.session_state.rag_model = model_name
+                st.session_state.rag_chain = build_chain(
+                    st.session_state.rag_chat_model,
+                    st.session_state.categoriser_base_url,
+                )
+                st.session_state.rag_model = st.session_state.rag_chat_model
                 st.session_state.chat_messages = []
                 st.success("Chat bereit.")
             except Exception as exc:
@@ -463,7 +275,7 @@ def render_upload_pipeline() -> None:
     with col_rag:
         reset = st.checkbox("RAG vorher leeren")
         if st.button("In RAG indexieren", use_container_width=True):
-            chunks = ingest_texts_to_rag(st.session_state.documents, reset=reset)
+            chunks = ingest_texts(st.session_state.documents, reset=reset)
             st.session_state.rag_chain = None
             st.session_state.rag_model = None
             st.success(f"{chunks} Chunk(s) gespeichert. Chat-Modell danach neu laden.")
@@ -526,10 +338,7 @@ def run_translation(documents: list[dict[str, Any]]) -> None:
 def render_categorisation() -> None:
     st.header("Modul A – Kategorisierung")
     st.subheader("LM Studio Modelle")
-    st.session_state.categoriser_base_url = st.text_input(
-        "LM Studio Base URL",
-        value=st.session_state.categoriser_base_url,
-    )
+    st.caption(f"Provider: `{st.session_state.categoriser_base_url}`")
 
     try:
         available_models = list_lm_studio_models(st.session_state.categoriser_base_url)
@@ -636,7 +445,7 @@ def render_rag() -> None:
     col_ingest, col_status = st.columns([1, 2])
     with col_ingest:
         if st.session_state.documents and st.button("Geladene Dokumente indexieren"):
-            chunks = ingest_texts_to_rag(st.session_state.documents)
+            chunks = ingest_texts(st.session_state.documents)
             st.session_state.rag_chain = None
             st.session_state.rag_model = None
             st.success(f"{chunks} Chunk(s) gespeichert.")
@@ -694,11 +503,11 @@ def render_overview() -> None:
     col_a, col_b, col_c, col_d = st.columns(4)
     col_a.metric("A Kategorisierung", "PostgreSQL + LM Studio")
     col_b.metric("B OCR", "Stub/Parser")
-    col_c.metric("C RAG", "ChromaDB + Ollama")
+    col_c.metric("C RAG", "ChromaDB + LM Studio")
     col_d.metric("D Übersetzung", "lokales Modell")
     st.info(
         "Die App sendet Dokumentinhalte nicht an externe APIs. Für die KI-Funktionen müssen die lokalen Dienste "
-        "wie PostgreSQL, LM Studio und Ollama separat laufen."
+        "wie PostgreSQL und LM Studio separat laufen."
     )
 
 

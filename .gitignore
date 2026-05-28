@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+model_cache/
 
 myPlan.md
 myPlanEn.md

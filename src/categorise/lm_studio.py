@@ -75,6 +75,20 @@ class LMStudioClient:
         data = response.json()
         return data["data"][0]["embedding"]
 
+    def list_models(self) -> list[str]:
+        return list_models(self.base_url, timeout=self.timeout)
+
+
+def list_models(base_url: str = DEFAULT_BASE_URL, timeout: int = 5) -> list[str]:
+    response = requests.get(f"{base_url.rstrip('/')}/models", timeout=timeout)
+    response.raise_for_status()
+    data = response.json()
+    return sorted(
+        model["id"]
+        for model in data.get("data", [])
+        if isinstance(model, dict) and model.get("id")
+    )
+
 
 def parse_json_object(content: str) -> dict[str, Any]:
     text = content.strip()
