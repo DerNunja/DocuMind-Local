@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import streamlit as st
+import requests
 
 
 ROOT = Path(__file__).resolve().parent
@@ -20,6 +21,11 @@ COLLECTION = "projektdokumente"
 EMBEDDING_MODEL = "intfloat/multilingual-e5-small"
 POSTGRES_CONTAINER = "documind-postgres"
 POSTGRES_IMAGE = "pgvector/pgvector:pg16"
+DEFAULT_LM_STUDIO_BASE_URL = os.getenv("LM_STUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+DEFAULT_CATEGORISER_CHAT_MODEL = os.getenv("LM_STUDIO_CHAT_MODEL", "google/gemma-4-e4b")
+DEFAULT_CATEGORISER_EMBEDDING_MODEL = os.getenv(
+    "LM_STUDIO_EMBEDDING_MODEL", "text-embedding-qwen3-embedding-4b"
+)
 
 RAG_MODELS = {
     "Phi-3.5 Mini (schneller)": {
@@ -76,6 +82,25 @@ def status_label(ok: bool, label: str) -> None:
         st.success(f"Verfügbar: {label}")
     else:
         st.warning(f"Nicht verbunden: {label}")
+
+
+@st.cache_data(ttl=30, show_spinner=False)
+def list_lm_studio_models(base_url: str) -> list[str]:
+    response = requests.get(f"{base_url.rstrip('/')}/models", timeout=5)
+    response.raise_for_status()
+    data = response.json()
+    return sorted(
+        model["id"]
+        for model in data.get("data", [])
+        if isinstance(model, dict) and model.get("id")
+    )
+
+
+def model_options(models: list[str], selected: str) -> list[str]:
+    options = list(models)
+    if selected and selected not in options:
+        options.insert(0, selected)
+    return options or [selected]
 
 
 @st.cache_resource(show_spinner=False)
@@ -190,7 +215,11 @@ def extract_document(path: Path) -> dict[str, Any]:
     }
 
 
-def get_category_service():
+def get_category_service(
+    chat_model: str | None = None,
+    embedding_model: str | None = None,
+    base_url: str | None = None,
+):
     from psycopg import OperationalError
 
     from src.categorise.lm_studio import LMStudioClient
@@ -201,7 +230,12 @@ def get_category_service():
         store = PostgresStore(DEFAULT_DATABASE_URL)
     except (OperationalError, RuntimeError) as exc:
         return None, f"PostgreSQL/pgvector nicht erreichbar: {exc}"
-    return CategorisationService(store, LMStudioClient()), None
+    client = LMStudioClient(
+        chat_model=chat_model or DEFAULT_CATEGORISER_CHAT_MODEL,
+        embedding_model=embedding_model or DEFAULT_CATEGORISER_EMBEDDING_MODEL,
+        base_url=base_url or DEFAULT_LM_STUDIO_BASE_URL,
+    )
+    return CategorisationService(store, client), None
 
 
 def seed_categories_if_needed(service: Any) -> tuple[int, int]:
@@ -322,6 +356,8 @@ def init_session_state() -> None:
         "chat_messages": [],
         "rag_chain": None,
         "rag_model": None,
+        "categoriser_base_url": DEFAULT_LM_STUDIO_BASE_URL,
+        "categoriser_chat_model": DEFAULT_CATEGORISER_CHAT_MODEL,
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -434,7 +470,10 @@ def render_upload_pipeline() -> None:
 
 
 def run_categorisation(documents: list[dict[str, Any]]) -> None:
-    service, error = get_category_service()
+    service, error = get_category_service(
+        chat_model=st.session_state.categoriser_chat_model,
+        base_url=st.session_state.categoriser_base_url,
+    )
     if error:
         st.error(error)
         return
@@ -486,12 +525,47 @@ def run_translation(documents: list[dict[str, Any]]) -> None:
 
 def render_categorisation() -> None:
     st.header("Modul A – Kategorisierung")
-    service, error = get_category_service()
+    st.subheader("LM Studio Modelle")
+    st.session_state.categoriser_base_url = st.text_input(
+        "LM Studio Base URL",
+        value=st.session_state.categoriser_base_url,
+    )
+
+    try:
+        available_models = list_lm_studio_models(st.session_state.categoriser_base_url)
+        st.caption(f"{len(available_models)} Modell(e) aus LM Studio geladen.")
+    except Exception as exc:
+        available_models = []
+        st.warning(f"LM Studio Modellliste nicht erreichbar. Manuelle Eingabe bleibt möglich. Details: {exc}")
+
+    chat_options = model_options(available_models, st.session_state.categoriser_chat_model)
+    selected_chat = st.selectbox(
+        "Chat-/Klassifikationsmodell",
+        chat_options,
+        index=chat_options.index(st.session_state.categoriser_chat_model),
+    )
+    custom_chat = st.text_input(
+        "Chat-Modell manuell überschreiben",
+        value=selected_chat,
+        help="Muss exakt dem Modellnamen in LM Studio entsprechen.",
+    )
+    st.session_state.categoriser_chat_model = custom_chat.strip() or selected_chat
+
+    service, error = get_category_service(
+        chat_model=st.session_state.categoriser_chat_model,
+        base_url=st.session_state.categoriser_base_url,
+    )
     status_label(error is None, "PostgreSQL/pgvector + LM Studio Client")
     if error:
         st.info("Starte PostgreSQL/pgvector und LM Studio, um die echte Kategorisierung zu verwenden.")
         st.code("docker start documind-postgres\nuv run python -m src.categorise seed-categories")
         return
+
+    st.info(
+        "Aktiv: "
+        f"Chat `{st.session_state.categoriser_chat_model}` · "
+        f"Embeddings `{DEFAULT_CATEGORISER_EMBEDDING_MODEL}`"
+    )
 
     assert service is not None
     col_seed, col_count = st.columns([1, 2])
