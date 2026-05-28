@@ -12,7 +12,7 @@ import streamlit as st
 
 from src.RAGBot.lm_studio_rag import CHROMA_PATH, build_chain, chroma_count, ingest_texts
 from src.categorise.docker import ensure_postgres_docker
-from src.categorise.lm_studio import list_models
+from src.categorise.lm_studio import list_chat_models
 
 
 ROOT = Path(__file__).resolve().parent
@@ -55,7 +55,7 @@ def status_label(ok: bool, label: str) -> None:
 
 @st.cache_data(ttl=30, show_spinner=False)
 def list_lm_studio_models(base_url: str) -> list[str]:
-    return list_models(base_url=base_url, timeout=5)
+    return list_chat_models(base_url=base_url, timeout=5)
 
 
 def model_options(models: list[str], selected: str) -> list[str]:
@@ -177,10 +177,9 @@ def render_sidebar() -> None:
             help="Wird gemeinsam für Kategorisierung und RAG genutzt.",
         )
         try:
-            lm_models = list_lm_studio_models(st.session_state.categoriser_base_url)
-            st.success(f"{len(lm_models)} Modell(e) verfügbar")
+            model_count = len(list_lm_studio_models(st.session_state.categoriser_base_url))
+            st.success(f"{model_count} Modell(e) verfügbar")
         except Exception as exc:
-            lm_models = []
             st.warning(f"LM Studio nicht erreichbar: {exc}")
 
         st.divider()
@@ -195,28 +194,6 @@ def render_sidebar() -> None:
             st.session_state.rag_chain = None
             st.session_state.rag_model = None
             st.rerun()
-
-        st.divider()
-        st.subheader("RAG-Modell")
-        rag_options = model_options(lm_models, st.session_state.rag_chat_model)
-        st.session_state.rag_chat_model = st.selectbox(
-            "LM Studio Modell",
-            rag_options,
-            index=rag_options.index(st.session_state.rag_chat_model),
-        )
-        if st.button("Chat-Modell laden", use_container_width=True):
-            try:
-                st.session_state.rag_chain = build_chain(
-                    st.session_state.rag_chat_model,
-                    st.session_state.categoriser_base_url,
-                )
-                st.session_state.rag_model = st.session_state.rag_chat_model
-                st.session_state.chat_messages = []
-                st.success("Chat bereit.")
-            except Exception as exc:
-                st.error(f"RAG konnte nicht geladen werden: {exc}")
-        if st.session_state.rag_model:
-            st.info(f"Aktiv: {st.session_state.rag_model}")
 
 
 def render_upload_pipeline() -> None:
@@ -345,7 +322,7 @@ def render_categorisation() -> None:
         st.caption(f"{len(available_models)} Modell(e) aus LM Studio geladen.")
     except Exception as exc:
         available_models = []
-        st.warning(f"LM Studio Modellliste nicht erreichbar. Manuelle Eingabe bleibt möglich. Details: {exc}")
+        st.warning(f"LM Studio Modellliste nicht erreichbar. Details: {exc}")
 
     chat_options = model_options(available_models, st.session_state.categoriser_chat_model)
     selected_chat = st.selectbox(
@@ -353,12 +330,7 @@ def render_categorisation() -> None:
         chat_options,
         index=chat_options.index(st.session_state.categoriser_chat_model),
     )
-    custom_chat = st.text_input(
-        "Chat-Modell manuell überschreiben",
-        value=selected_chat,
-        help="Muss exakt dem Modellnamen in LM Studio entsprechen.",
-    )
-    st.session_state.categoriser_chat_model = custom_chat.strip() or selected_chat
+    st.session_state.categoriser_chat_model = selected_chat
 
     service, error = get_category_service(
         chat_model=st.session_state.categoriser_chat_model,
@@ -442,6 +414,40 @@ def render_rag() -> None:
     st.header("Modul C – RAG-Chatbot")
     st.caption(f"ChromaDB: {CHROMA_PATH}")
 
+    try:
+        available_models = list_lm_studio_models(st.session_state.categoriser_base_url)
+        st.caption(f"{len(available_models)} Modell(e) aus LM Studio geladen.")
+    except Exception as exc:
+        available_models = []
+        st.warning(f"LM Studio Modellliste nicht erreichbar. Details: {exc}")
+
+    col_model, col_load = st.columns([2, 1])
+    with col_model:
+        rag_options = model_options(available_models, st.session_state.rag_chat_model)
+        selected_rag_model = st.selectbox(
+            "RAG-Chatmodell",
+            rag_options,
+            index=rag_options.index(st.session_state.rag_chat_model),
+        )
+        st.session_state.rag_chat_model = selected_rag_model
+    with col_load:
+        st.write("")
+        st.write("")
+        if st.button("Chat-Modell laden", use_container_width=True):
+            try:
+                st.session_state.rag_chain = build_chain(
+                    st.session_state.rag_chat_model,
+                    st.session_state.categoriser_base_url,
+                )
+                st.session_state.rag_model = st.session_state.rag_chat_model
+                st.session_state.chat_messages = []
+                st.success("Chat bereit.")
+            except Exception as exc:
+                st.error(f"RAG konnte nicht geladen werden: {exc}")
+
+    if st.session_state.rag_model:
+        st.info(f"Aktives RAG-Modell: `{st.session_state.rag_model}`")
+
     col_ingest, col_status = st.columns([1, 2])
     with col_ingest:
         if st.session_state.documents and st.button("Geladene Dokumente indexieren"):
@@ -453,7 +459,7 @@ def render_rag() -> None:
         st.metric("Aktuelle Chunks", chroma_count())
 
     if st.session_state.rag_chain is None:
-        st.info("Lade zuerst ein Chat-Modell in der Sidebar.")
+        st.info("Lade zuerst ein Chat-Modell in diesem Tab.")
         return
 
     for message in st.session_state.chat_messages:
@@ -478,9 +484,20 @@ def render_rag() -> None:
             start = time.time()
             try:
                 result = st.session_state.rag_chain.invoke({"query": "query: " + question})
-                answer = result.get("result", "Keine Antwort.")
+                answer = str(result.get("result") or "").strip()
                 sources = result.get("source_documents", [])
-                st.markdown(answer)
+                if answer:
+                    st.markdown(answer)
+                else:
+                    st.warning(
+                        "LM Studio hat keine finale Antwort zurückgegeben. "
+                        "Die Quellen wurden gefunden, aber das Modell lieferte leeren Antworttext."
+                    )
+                    answer = "Keine finale Antwort vom Modell erhalten."
+                    raw_response = result.get("raw_response")
+                    if raw_response:
+                        with st.expander("LM-Studio-Rohantwort"):
+                            st.json(raw_response)
                 st.caption(f"{time.time() - start:.1f}s · {st.session_state.rag_model}")
                 if sources:
                     with st.expander("Quellen"):

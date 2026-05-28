@@ -90,6 +90,15 @@ def list_models(base_url: str = DEFAULT_BASE_URL, timeout: int = 5) -> list[str]
     )
 
 
+def list_chat_models(base_url: str = DEFAULT_BASE_URL, timeout: int = 5) -> list[str]:
+    return [model for model in list_models(base_url, timeout) if not is_embedding_model(model)]
+
+
+def is_embedding_model(model_id: str) -> bool:
+    normalized = model_id.lower()
+    return "embedding" in normalized or "embed" in normalized
+
+
 def parse_json_object(content: str) -> dict[str, Any]:
     text = content.strip()
     fence_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)

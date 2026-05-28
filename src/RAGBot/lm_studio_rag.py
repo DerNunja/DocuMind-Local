@@ -12,7 +12,7 @@ COLLECTION = "projektdokumente"
 EMBEDDING_MODEL = "intfloat/multilingual-e5-small"
 RETRIEVAL_K = 4
 RETRIEVAL_FETCH_K = 12
-MAX_TOKENS = 280
+MAX_TOKENS = 10000
 
 RAG_PROMPT = """Du bist ein lokaler Projektmanagement-Assistent.
 Beantworte die Frage nur auf Basis der folgenden Dokument-Auszüge.
@@ -125,6 +125,15 @@ class LMStudioRagChain:
             for doc in source_documents
         )
         prompt = RAG_PROMPT.format(context=context, question=question)
+        data = self._chat(prompt, max_tokens=MAX_TOKENS)
+        answer = extract_chat_response_text(data)
+        return {
+            "result": answer,
+            "raw_response": data,
+            "source_documents": source_documents,
+        }
+
+    def _chat(self, prompt: str, max_tokens: int, temperature: float = 0.1) -> dict[str, Any]:
         response = requests.post(
             f"{self.base_url}/chat/completions",
             json={
@@ -133,17 +142,53 @@ class LMStudioRagChain:
                     {"role": "system", "content": "Du beantwortest Fragen zu lokalen Projektdokumenten."},
                     {"role": "user", "content": prompt},
                 ],
-                "temperature": 0.1,
-                "max_tokens": MAX_TOKENS,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "stream": False,
+                "chat_template_kwargs": {"enable_thinking": True},
             },
             timeout=120,
         )
         response.raise_for_status()
-        data = response.json()
-        return {
-            "result": data["choices"][0]["message"]["content"],
-            "source_documents": source_documents,
-        }
+        return response.json()
+
+
+def extract_chat_response_text(data: dict[str, Any]) -> str:
+    choices = data.get("choices") or []
+    if not choices:
+        return ""
+
+    choice = choices[0]
+    message = choice.get("message") or {}
+    content = message.get("content")
+
+    if isinstance(content, str):
+        text = content.strip()
+        if text:
+            return text
+    elif isinstance(content, list):
+        text_parts = []
+        for part in content:
+            if isinstance(part, dict):
+                text_parts.append(str(part.get("text") or part.get("content") or ""))
+            else:
+                text_parts.append(str(part))
+        text = "".join(text_parts).strip()
+        if text:
+            return text
+
+    for key in ("text", "output_text"):
+        value = choice.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+
+    # Some reasoning models expose the final text inconsistently via extra fields.
+    for key in ("reasoning_content", "reasoning", "thinking"):
+        value = message.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+
+    return ""
 
 
 def build_chain(model_name: str, base_url: str) -> LMStudioRagChain:
