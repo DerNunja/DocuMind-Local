@@ -66,6 +66,21 @@ def model_options(models: list[str], selected: str) -> list[str]:
 
 
 def extract_document(path: Path) -> dict[str, Any]:
+    if path.suffix.lower() == ".pdf":
+        try:
+            from src.OCR.docling_scanner import extrahiere_dokument as extrahiere_pdf_mit_docling
+
+            return extrahiere_pdf_mit_docling(str(path))
+        except Exception as exc:
+            return {
+                "dateiname": path.name,
+                "dokument_key": f"DOC-{abs(hash(path.name)) % 10**8:08d}",
+                "text": "",
+                "seiten": 0,
+                "source_path": str(path),
+                "error": f"Docling-OCR fehlgeschlagen: {exc}",
+            }
+
     ensure_import_path(RAGBOT_DIR)
     from modul_b_stub import extrahiere_dokument
 
@@ -256,6 +271,92 @@ def render_upload_pipeline() -> None:
             st.session_state.rag_chain = None
             st.session_state.rag_model = None
             st.success(f"{chunks} Chunk(s) gespeichert. Chat-Modell danach neu laden.")
+
+
+def render_ocr() -> None:
+    st.header("Modul B – OCR / Digitalisierung")
+    st.caption("PDF-Verarbeitung mit Docling, Ausgabe als Markdown und semantische Chunks")
+
+    export_json = st.checkbox("JSON exportieren", value=False)
+    export_markdown = st.checkbox("Markdown exportieren", value=False)
+    uploaded_files = st.file_uploader(
+        "PDFs für OCR hochladen",
+        type=["pdf"],
+        accept_multiple_files=True,
+        key="ocr_upload",
+    )
+
+    if uploaded_files and st.button("OCR starten", type="primary"):
+        results = []
+        export_dir = ROOT / "outputs" / "ocr"
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            progress = st.progress(0)
+            for index, uploaded_file in enumerate(uploaded_files, start=1):
+                progress.progress(index / len(uploaded_files), text=f"Verarbeite {uploaded_file.name}")
+                file_path = save_uploaded_file(uploaded_file, tmp_path)
+                try:
+                    from src.OCR.docling_scanner import extrahiere_dokument as extrahiere_pdf_mit_docling
+
+                    results.append(
+                        extrahiere_pdf_mit_docling(
+                            str(file_path),
+                            export_json=export_json,
+                            export_markdown=export_markdown,
+                            output_dir=str(export_dir),
+                        )
+                    )
+                except Exception as exc:
+                    results.append(
+                        {
+                            "dateiname": uploaded_file.name,
+                            "dokument_key": f"DOC-{abs(hash(uploaded_file.name)) % 10**8:08d}",
+                            "text": "",
+                            "seiten": 0,
+                            "source_path": str(file_path),
+                            "error": f"Docling-OCR fehlgeschlagen: {exc}",
+                        }
+                    )
+            progress.empty()
+        st.session_state.documents = results
+        st.session_state.category_results = {}
+        st.session_state.translation_results = {}
+        st.success(f"{len(results)} PDF(s) verarbeitet.")
+        if export_json or export_markdown:
+            st.info(f"Exporte liegen unter `{export_dir}`.")
+
+    if not st.session_state.documents:
+        st.info("Noch keine OCR-Ergebnisse vorhanden.")
+        return
+
+    for doc in st.session_state.documents:
+        with st.expander(f"{doc.get('dateiname', 'Dokument')} · {doc.get('dokument_key', 'ohne Key')}"):
+            col_meta, col_text = st.columns([1, 3])
+            with col_meta:
+                st.metric("Zeichen", len(doc.get("text", "")))
+                st.metric("Chunks", doc.get("total_chunks", len(doc.get("chunks", []))))
+                if doc.get("error"):
+                    st.error(doc["error"])
+            with col_text:
+                st.text_area("Markdown", doc.get("text", "")[:5000], height=260, key=f"ocr_text_{doc.get('dokument_key')}")
+
+            chunks = doc.get("chunks") or []
+            if chunks:
+                with st.expander("Docling-Chunks"):
+                    for chunk in chunks:
+                        st.caption(chunk.get("chunk_id", "chunk"))
+                        st.text(chunk.get("content", "")[:1000])
+
+    col_cat, col_rag = st.columns(2)
+    with col_cat:
+        if st.button("OCR-Ergebnisse kategorisieren", use_container_width=True):
+            run_categorisation(st.session_state.documents)
+    with col_rag:
+        if st.button("OCR-Ergebnisse in RAG indexieren", use_container_width=True):
+            chunks = ingest_texts(st.session_state.documents)
+            st.session_state.rag_chain = None
+            st.session_state.rag_model = None
+            st.success(f"{chunks} Chunk(s) gespeichert.")
 
 
 def run_categorisation(documents: list[dict[str, Any]]) -> None:
@@ -624,6 +725,7 @@ def main() -> None:
     tabs = st.tabs([
         "Überblick",
         "Pipeline",
+        "OCR",
         "Kategorisierung",
         "Übersetzung",
         "RAG-Chatbot",
@@ -633,10 +735,12 @@ def main() -> None:
     with tabs[1]:
         render_upload_pipeline()
     with tabs[2]:
-        render_categorisation()
+        render_ocr()
     with tabs[3]:
-        render_translation()
+        render_categorisation()
     with tabs[4]:
+        render_translation()
+    with tabs[5]:
         render_rag()
 
 
