@@ -1,31 +1,38 @@
-# translate.py
-import os
-# DAS HIER MUSS DIE ABSOLUT ERSTE ZEILE SEIN, BEVOR IRGENDWAS ANDERES IMPORTIERT WIRD!
-os.environ["HF_SKIP_CHECK_TORCH_LOAD_IN_SAFE"] = "True"
-
-import argparse
-import json
-import sys
+import time
 from service import TranslationService
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Modul D – Konsolen-Schnittstelle"
-    )
-    parser.add_argument(
-        "--text", 
-        type=str, 
-        required=True,
-        help="Der deutsche Text, der übersetzt werden soll."
-    )
-    
-    args = parser.parse_args()
+def run_integration_test():
+    print("=" * 60)
+    print("[*] Starte automatisierten Test")
+    print("=" * 60)
+
+    test_saetze = [
+        "Das Rohrleitungs- und Instrumentenfließschema muss überprüft werden.",
+        "Der Wartungsplan ist im Anhang zu finden.",
+        "Projektmanagement ermöglicht eine frühzeitige Prüfung.",
+        "Sicherheitsventile müssen kalibriert werden."
+    ]
 
     service = TranslationService()
-    ergebnis = service.übersetze_text(args.text)
-    
-    # Gibt das saubere JSON in der Konsole aus
-    print(json.dumps(ergebnis, indent=4, ensure_ascii=False))
+    erfolgreich = 0
+
+    for i, satz in enumerate(test_saetze, 1):
+        print(f"\n[Test {i}] {satz}")
+
+        start = time.time()
+        ergebnis = service.übersetze_text(satz, modus="de-en")
+        end = time.time()
+
+        print(f"Übersetzung: {ergebnis['translated']}")
+        print(f"Zeit: {end - start:.2f}s")
+
+        if ergebnis["translated"]:
+            erfolgreich += 1
+            print("OK")
+        else:
+            print("FAIL")
+
+    print(f"\nErgebnis: {erfolgreich}/{len(test_saetze)} erfolgreich")
 
 if __name__ == "__main__":
-    main()
+    run_integration_test()
