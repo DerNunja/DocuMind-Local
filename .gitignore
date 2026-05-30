@@ -5,6 +5,8 @@ build/
 dist/
 wheels/
 *.egg-info
+vectordb/
+src/translator/model_cache/
 
 myPlan.md
 myPlanEn.md
